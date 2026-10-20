@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lottery Tracker</title>
+<style>
+:root{--bg:#f6f5f1;--card:#fff;--tx:#1c1c1a;--mu:#6b6b66;--bd:#dedcd4;--ac:#0f766e;--wn:#15803d;--dg:#b91c1c;--in:#f1efe8;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#151514;--card:#201f1d;--tx:#eeede8;--mu:#9a9990;--bd:#3a3935;--ac:#2dd4bf;--wn:#4ade80;--dg:#f87171;--in:#2b2a27}}
+:root[data-theme="dark"]{--bg:#151514;--card:#201f1d;--tx:#eeede8;--mu:#9a9990;--bd:#3a3935;--ac:#2dd4bf;--wn:#4ade80;--dg:#f87171;--in:#2b2a27}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,"Noto Sans Sinhala","Iskoola Pota",sans-serif}
+main{max-width:720px;margin:0 auto;padding:14px}
+h1{font-size:20px;margin:6px 0 2px}h2{font-size:16px;margin:0 0 10px}
+.sub{color:var(--mu);font-size:13px;margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin-bottom:14px}
+.sc{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:5px 4px;text-align:right;border-bottom:1px solid var(--bd);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--mu);font-weight:600;font-size:12px}
+input,select,button{font:inherit;color:var(--tx);background:var(--in);border:1px solid var(--bd);border-radius:8px;padding:6px}
+td input{width:64px;text-align:right}td input.nm{width:110px;text-align:left}
+.grp td{background:var(--in);font-weight:700;color:var(--ac);text-align:left}
+tfoot td,.tot td{font-weight:700;border-bottom:0}
+.wn{color:var(--wn)}.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+button{cursor:pointer;background:var(--ac);color:#fff;border:0;padding:7px 12px}
+button.x{background:transparent;color:var(--dg);padding:2px 8px}
+.note{font-size:12px;color:var(--mu);margin-top:8px}
+</style>
+</head>
+<body>
+<main>
+<h1>🎟️ Lottery Tracker</h1>
+<div class="sub">එක් ටිකට් එකක් Rs. 40</div>
+
+<section class="card"><h2>1. Lottery වර්ග (NLB / DLB)</h2>
+<div class="sc"><table id="t1"></table></div>
+<div class="note">නම මත ටයිප් කර වෙනස් කරන්න. Win / Not Win / Win Rs. ඇතුළත් කරන්න; Total සහ Win % ස්වයංක්‍රීයයි.</div></section>
+
+<section class="card"><h2>2. මාසික වගුව</h2>
+<div class="row"><select id="ms"></select><input type="month" id="mn"><button id="ma">+ මාසය</button></div>
+<table id="t2"></table>
+<h2 style="margin-top:16px">සියල්ල (All)</h2>
+<table id="t2a"></table></section>
+
+<section class="card"><h2>3. දිනවල ජයග්‍රහණ</h2>
+<div class="row"><input type="date" id="dd"><input type="number" inputmode="numeric" id="dr" placeholder="Win Rs." style="width:110px"><button id="da">Add</button></div>
+<table id="t3"></table></section>
+<div class="note">දත්ත මෙම උපාංගයේ බ්‍රවුසරයේ පමණක් සුරැකේ.</div>
+</main>
+<script>
+const P=40,KEY="lotto-v1";
+const MON=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const num=v=>{v=parseFloat(v);return isNaN(v)||v<0?0:v};
+const fmt=n=>Math.round(n*100)/100===Math.round(n)?Math.round(n).toLocaleString("en-US"):n.toFixed(2);
+const mk=()=>({buy:0,win:0,free:0,rebuy:0,saving:0});
+let S;
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){S=null}
+if(!S||!S.rows){S={names:[],rows:[],months:{"2026-08":mk(),"2026-09":mk(),"2026-10":mk()},days:[],sel:"2026-10"};
+for(let i=0;i<20;i++){S.names.push((i<10?"NLB ":"DLB ")+(i%10+1));S.rows.push({w:0,n:0,r:0})}}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const $=id=>document.getElementById(id);
+const ml=k=>MON[+k.slice(5)-1]+" "+k.slice(0,4);
+const inp=(s,k,v,extra="")=>`<input type="number" inputmode="numeric" min="0" data-s="${s}" data-k="${k}" ${extra} value="${v||""}" placeholder="0">`;
+
+function render(){
+ let h=`<thead><tr><th>Name</th><th>Win</th><th>Not Win</th><th>Total</th><th>Win %</th><th>Win Rs.</th></tr></thead><tbody>`;
+ for(let i=0;i<20;i++){
+  if(i==0)h+=`<tr class="grp"><td colspan="6">NLB</td></tr>`;
+  if(i==10)h+=`<tr class="grp"><td colspan="6">DLB</td></tr>`;
+  const r=S.rows[i];
+  h+=`<tr><td><input class="nm" data-s="N" data-i="${i}" value="${S.names[i]}"></td><td>${inp("L","w",r.w,`data-i="${i}"`)}</td><td>${inp("L","n",r.n,`data-i="${i}"`)}</td><td id="lt${i}"></td><td id="lp${i}"></td><td>${inp("L","r",r.r,`data-i="${i}"`)}</td></tr>`;
+ }
+ h+=`</tbody><tfoot><tr><td>Total</td><td id="sw"></td><td id="sn"></td><td id="st"></td><td id="sp"></td><td id="sr"></td></tr></tfoot>`;
+ $("t1").innerHTML=h;
+ const keys=Object.keys(S.months).sort();
+ $("ms").innerHTML=keys.map(k=>`<option value="${k}" ${k==S.sel?"selected":""}>${ml(k)}</option>`).join("");
+ const m=S.months[S.sel]||mk();
+ const lab={buy:"Buy",win:"Win",free:"Free",rebuy:"Re-Buy"};
+ let t=`<thead><tr><th>${S.sel?ml(S.sel):""}</th><th>Count</th><th>Value</th></tr></thead><tbody>`;
+ for(const k in lab)t+=`<tr><td>${lab[k]}</td><td>${inp("M",k,m[k])}</td><td id="mv${k}"></td></tr>`;
+ t+=`<tr><td>Saving</td><td></td><td>${inp("M","saving",m.saving)}</td></tr></tbody>`;
+ $("t2").innerHTML=t;
+ const d=[...S.days].sort((a,b)=>b.d.localeCompare(a.d));
+ let x=`<thead><tr><th>Date</th><th>Win Rs.</th><th></th></tr></thead><tbody>`;
+ d.forEach(e=>{x+=`<tr><td>${e.d}</td><td>${fmt(e.r)}</td><td><button class="x" data-del="${e.id}">✕</button></td></tr>`});
+ x+=`</tbody><tfoot><tr><td>All Rs.</td><td id="dtot" class="wn"></td><td></td></tr></tfoot>`;
+ $("t3").innerHTML=x;
+ update();
+}
+function update(){
+ let sw=0,sn=0,sr=0;
+ S.rows.forEach((r,i)=>{const t=r.w+r.n;sw+=r.w;sn+=r.n;sr+=r.r;
+  $("lt"+i).textContent=t;$("lp"+i).textContent=t?(r.w/t*100).toFixed(1)+"%":"0%"});
+ const st=sw+sn;
+ $("sw").textContent=sw;$("sn").textContent=sn;$("st").textContent=st;
+ $("sp").textContent=st?(sw/st*100).toFixed(1)+"%":"0%";$("sr").textContent=fmt(sr);
+ const m=S.months[S.sel]||mk();
+ for(const k of ["buy","win","free","rebuy"])$("mv"+k).textContent=fmt(m[k]*P);
+ const A=mk();
+ for(const k in S.months)for(const f in A)A[f]+=S.months[k][f];
+ const all=A.buy+A.free+A.rebuy;
+ $("t2a").innerHTML=`<thead><tr><th>All</th><th>Count</th><th>Value</th></tr></thead><tbody>
+ <tr><td>Buy</td><td>${A.buy}</td><td>${fmt(A.buy*P)}</td></tr>
+ <tr><td>Win</td><td>${A.win}</td><td>${fmt(A.win*P)}</td></tr>
+ <tr><td>Free</td><td>${A.free}</td><td>${fmt(A.free*P)}</td></tr>
+ <tr><td>Re-Buy</td><td>${A.rebuy}</td><td>${fmt(A.rebuy*P)}</td></tr>
+ <tr><td>Saving</td><td></td><td>${fmt(A.saving)} /=</td></tr>
+ <tr class="tot"><td>All</td><td>${all} (${A.buy}+${A.free}+${A.rebuy})</td><td>${fmt(all*P)}</td></tr></tbody>`;
+ $("dtot").textContent=fmt(S.days.reduce((s,e)=>s+e.r,0));
+}
+document.addEventListener("input",e=>{
+ const t=e.target,s=t.dataset.s;if(!s)return;
+ if(s=="N")S.names[t.dataset.i]=t.value;
+ else if(s=="L")S.rows[t.dataset.i][t.dataset.k]=num(t.value);
+ else if(s=="M")S.months[S.sel][t.dataset.k]=num(t.value);
+ save();update();
+});
+$("ms").onchange=e=>{S.sel=e.target.value;save();render()};
+$("ma").onclick=()=>{const v=$("mn").value;if(!v)return;if(!S.months[v])S.months[v]=mk();S.sel=v;save();render()};
+$("da").onclick=()=>{const d=$("dd").value,r=num($("dr").value);if(!d||!r)return;
+ S.days.push({id:Date.now(),d,r});$("dr").value="";save();render()};
+document.addEventListener("click",e=>{const id=e.target.dataset&&e.target.dataset.del;
+ if(id){S.days=S.days.filter(x=>String(x.id)!==id);save();render()}});
+render();
+</script>
+</body>
+</html>
