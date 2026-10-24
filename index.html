@@ -21,7 +21,7 @@ table{width:100%;border-collapse:collapse;font-size:14px}
 th,td{padding:5px 4px;text-align:right;border-bottom:1px solid var(--bd);white-space:nowrap}
 th:first-child,td:first-child{text-align:left}
 th{color:var(--mu);font-weight:600;font-size:12px}
-input,select,button{font:inherit;color:var(--tx);background:var(--in);border:1px solid var(--bd);border-radius:8px;padding:6px}
+input,select,button,textarea{font:inherit;color:var(--tx);background:var(--in);border:1px solid var(--bd);border-radius:8px;padding:6px}
 td input{width:64px;text-align:right}td input.nm{width:110px;text-align:left}
 .grp td{background:var(--in);font-weight:700;color:var(--ac);text-align:left}
 tfoot td,.tot td{font-weight:700;border-bottom:0}
@@ -49,6 +49,10 @@ button.x{background:transparent;color:var(--dg);padding:2px 8px}
 <section class="card"><h2>3. දිනවල ජයග්‍රහණ</h2>
 <div class="row"><input type="date" id="dd"><input type="number" inputmode="numeric" id="dr" placeholder="Win Rs." style="width:110px"><button id="da">Add</button></div>
 <table id="t3"></table></section>
+<section class="card"><h2>4. Backup / Restore</h2>
+<div class="row"><button id="bk">Backup (copy)</button><button id="rs">Restore</button></div>
+<textarea id="bx" rows="4" style="width:100%" placeholder="Restore කිරීමට backup text මෙහි paste කරන්න"></textarea>
+<div class="note" id="bm"></div></section>
 <div class="note">දත්ත මෙම උපාංගයේ බ්‍රවුසරයේ පමණක් සුරැකේ.</div>
 </main>
 <script>
@@ -129,6 +133,11 @@ document.addEventListener("click",e=>{const D=e.target.dataset||{};
  if(D.rm!==undefined){const it=S.items[D.rm];if(it&&confirm(it.name+" මකන්නද?")){S.items.splice(+D.rm,1);save();render()}return}
  const id=D.del;
  if(id){S.days=S.days.filter(x=>String(x.id)!==id);save();render()}});
+const msg=t=>{$("bm").textContent=t};
+$("bk").onclick=()=>{$("bx").value=JSON.stringify(S);$("bx").select();
+ try{navigator.clipboard.writeText($("bx").value).then(()=>msg("Copy වුණා. Notes app එකක save කරගන්න."),()=>msg("Text එක select කර copy කරන්න."))}catch(e){msg("Text එක select කර copy කරන්න.")}};
+$("rs").onclick=()=>{try{const d=JSON.parse($("bx").value);if(!d.items||!d.months)throw 0;
+ if(confirm("දැනට ඇති දත්ත replace කරන්නද?")){S=d;save();render();msg("Restore වුණා.")}}catch(e){msg("වලංගු backup text එකක් නොවේ.")}};
 render();
 </script>
 </body>
