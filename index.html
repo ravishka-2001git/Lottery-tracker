@@ -5,72 +5,100 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Lottery Tracker</title>
 <style>
-:root{--bg:#f6f5f1;--card:#fff;--tx:#1c1c1a;--mu:#6b6b66;--bd:#dedcd4;--ac:#0f766e;--wn:#15803d;--dg:#b91c1c;--in:#f1efe8;
+:root{--bg:#f3f4f8;--card:#fff;--tx:#17182b;--mu:#6a6d85;--bd:#e3e5ef;--ac:#5b4be0;--ac2:#8b5cf6;--wn:#16a34a;--dg:#dc2626;--in:#f0f1f8;--sh:0 2px 10px rgba(30,30,80,.07);
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#151514;--card:#201f1d;--tx:#eeede8;--mu:#9a9990;--bd:#3a3935;--ac:#2dd4bf;--wn:#4ade80;--dg:#f87171;--in:#2b2a27}}
-:root[data-theme="dark"]{--bg:#151514;--card:#201f1d;--tx:#eeede8;--mu:#9a9990;--bd:#3a3935;--ac:#2dd4bf;--wn:#4ade80;--dg:#f87171;--in:#2b2a27}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1020;--card:#1a1b2e;--tx:#ececf8;--mu:#9a9cb8;--bd:#2b2d47;--ac:#8b7cff;--ac2:#a78bfa;--wn:#4ade80;--dg:#f87171;--in:#232540;--sh:none}}
+:root[data-theme="dark"]{--bg:#0f1020;--card:#1a1b2e;--tx:#ececf8;--mu:#9a9cb8;--bd:#2b2d47;--ac:#8b7cff;--ac2:#a78bfa;--wn:#4ade80;--dg:#f87171;--in:#232540;--sh:none}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,"Noto Sans Sinhala","Iskoola Pota",sans-serif}
-main{max-width:720px;margin:0 auto;padding:14px}
-h1{font-size:20px;margin:6px 0 2px}h2{font-size:16px;margin:0 0 10px}
-.sub{color:var(--mu);font-size:13px;margin-bottom:12px}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin-bottom:14px}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Noto Sans Sinhala","Iskoola Pota",sans-serif}
+main{max-width:720px;margin:0 auto;padding:12px 12px 96px}
+.hd{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;border-radius:18px;padding:16px;display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;box-shadow:var(--sh)}
+.hd h1{margin:0;font-size:19px}.hd small{opacity:.85}
+.pill{background:rgba(255,255,255,.2);border-radius:12px;padding:6px 10px;text-align:right;font-size:12px;line-height:1.2}
+.pill b{display:block;font-size:17px}
+.pg{display:none}.pg.on{display:block}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px;margin-bottom:14px;box-shadow:var(--sh)}
+h2{font-size:16px;margin:0 0 10px}
 .sc{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:14px}
-th,td{padding:5px 4px;text-align:right;border-bottom:1px solid var(--bd);white-space:nowrap}
+th,td{padding:6px 4px;text-align:right;border-bottom:1px solid var(--bd);white-space:nowrap}
 th:first-child,td:first-child{text-align:left}
 th{color:var(--mu);font-weight:600;font-size:12px}
-input,select,button,textarea{font:inherit;color:var(--tx);background:var(--in);border:1px solid var(--bd);border-radius:8px;padding:6px}
-td input{width:64px;text-align:right}td input.nm{width:110px;text-align:left}
-.grp td{background:var(--in);font-weight:700;color:var(--ac);text-align:left}
+input,select,button,textarea{font:inherit;color:var(--tx);background:var(--in);border:1px solid var(--bd);border-radius:10px;padding:7px}
+td input{width:66px;text-align:right}td input.nm{width:112px;text-align:left}
+.grp td{background:var(--in);font-weight:700;color:var(--ac);text-align:left;border-radius:6px}
 tfoot td,.tot td{font-weight:700;border-bottom:0}
-.wn{color:var(--wn)}.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-button{cursor:pointer;background:var(--ac);color:#fff;border:0;padding:7px 12px}
+button{cursor:pointer;background:var(--ac);color:#fff;border:0;padding:8px 14px;font-weight:600}
 button.x{background:transparent;color:var(--dg);padding:2px 8px}
-.note{font-size:12px;color:var(--mu);margin-top:8px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.wn{color:var(--wn)}.note{font-size:12px;color:var(--mu);margin-top:8px}
+.big{text-align:center;margin-top:14px;padding:14px;border-radius:14px;background:var(--in)}
+.big .l{font-size:13px;color:var(--mu)}
+.big .v{font-size:38px;font-weight:800;line-height:1.15}
+.big .v.neg{color:var(--dg)}.big .v.pos{color:var(--wn)}
+.md{font-size:18px;text-align:center!important;width:28px}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--bd);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
+nav button{flex:1;background:transparent;color:var(--mu);font-size:11px;padding:6px 2px;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button span{font-size:19px}
+nav button.on{color:var(--ac);background:var(--in)}
 </style>
 </head>
 <body>
 <main>
-<h1>🎟️ Lottery Tracker</h1>
-<div class="sub">එක් ටිකට් එකක් Rs. 40</div>
+<div class="hd"><div><h1>🎟️ Lottery Tracker</h1><small>ටිකට් එකක් Rs. 40</small></div><div class="pill">Win − Buy<b id="hn"></b></div></div>
 
-<section class="card"><h2>1. Lottery වර්ග (NLB / DLB)</h2>
+<div class="pg" id="p0"><section class="card"><h2>Lottery වර්ග</h2>
 <div class="sc"><table id="t1"></table></div>
-<div class="note">නම මත ටයිප් කර වෙනස් කරන්න. Win / Not Win / Win Rs. ඇතුළත් කරන්න; Total සහ Win % ස්වයංක්‍රීයයි.</div></section>
+<div class="note">නම මත ටයිප් කර වෙනස් කරන්න. Total සහ Win % ස්වයංක්‍රීයයි.</div></section></div>
 
-<section class="card"><h2>2. මාසික වගුව</h2>
+<div class="pg" id="p1"><section class="card"><h2>මාසික වගුව</h2>
 <div class="row"><select id="ms"></select><input type="month" id="mn"><button id="ma">+ මාසය</button></div>
-<table id="t2"></table>
-<h2 style="margin-top:16px">සියල්ල (All)</h2>
-<table id="t2a"></table></section>
+<table id="t2"></table></section>
+<section class="card"><h2>සියල්ල (All)</h2><table id="t2a"></table>
+<div class="big"><div class="l">Win − Buy</div><div class="v" id="diff"></div><div class="l" id="dsub"></div></div></section></div>
 
-<section class="card"><h2>3. දිනවල ජයග්‍රහණ</h2>
+<div class="pg" id="p2"><section class="card"><h2>දිනවල ජයග්‍රහණ</h2>
 <div class="row"><input type="date" id="dd"><input type="number" inputmode="numeric" id="dr" placeholder="Win Rs." style="width:110px"><button id="da">Add</button></div>
-<table id="t3"></table></section>
-<section class="card"><h2>4. Backup / Restore</h2>
+<table id="t3"></table>
+<div class="note">🥇🥈🥉 වැඩිම Win අගයන් 3 සඳහා පෙන්වයි.</div></section></div>
+
+<div class="pg" id="p3"><section class="card"><h2>Backup / Restore</h2>
 <div class="row"><button id="bk">Backup (copy)</button><button id="rs">Restore</button></div>
-<textarea id="bx" rows="4" style="width:100%" placeholder="Restore කිරීමට backup text මෙහි paste කරන්න"></textarea>
-<div class="note" id="bm"></div></section>
-<div class="note">දත්ත මෙම උපාංගයේ බ්‍රවුසරයේ පමණක් සුරැකේ.</div>
+<textarea id="bx" rows="5" style="width:100%" placeholder="Restore කිරීමට backup text මෙහි paste කරන්න"></textarea>
+<div class="note" id="bm"></div>
+<div class="note">දත්ත මෙම උපාංගයේ බ්‍රවුසරයේ පමණක් සුරැකේ.</div></section></div>
 </main>
+<nav>
+<button data-tab="0"><span>🎟️</span>Lotteries</button>
+<button data-tab="1"><span>📅</span>Monthly</button>
+<button data-tab="2"><span>🏆</span>Days</button>
+<button data-tab="3"><span>💾</span>Backup</button>
+</nav>
 <script>
 const P=40,KEY="lotto-v1";
 const MON=["January","February","March","April","May","June","July","August","September","October","November","December"];
 const num=v=>{v=parseFloat(v);return isNaN(v)||v<0?0:v};
-const fmt=n=>Math.round(n*100)/100===Math.round(n)?Math.round(n).toLocaleString("en-US"):n.toFixed(2);
-const mk=()=>({buy:0,win:0,free:0,rebuy:0,saving:0});
+const fmt=n=>(Math.round(n*100)/100).toLocaleString("en-US");
+const mk=()=>({buy:0,win:0,winval:0,free:0,rebuy:0,saving:0});
 let S;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){S=null}
 if(S&&S.rows&&!S.items){S.items=S.rows.map((r,i)=>({g:i<10?"N":"D",name:S.names[i],w:r.w,n:r.n,r:r.r}));delete S.rows;delete S.names}
 if(!S||!S.items){S={items:[],months:{"2026-08":mk(),"2026-09":mk(),"2026-10":mk()},days:[],sel:"2026-10"};
 for(let i=0;i<20;i++)S.items.push({g:i<10?"N":"D",name:(i<10?"NLB ":"DLB ")+(i%10+1),w:0,n:0,r:0})}
+for(const k in S.months){const d=mk();for(const f in d)if(typeof S.months[k][f]!=="number")S.months[k][f]=0}
+if(!S.days)S.days=[];
+if(!S.tab)S.tab=0;
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 const $=id=>document.getElementById(id);
 const ml=k=>MON[+k.slice(5)-1]+" "+k.slice(0,4);
 const inp=(s,k,v,extra="")=>`<input type="number" inputmode="numeric" min="0" data-s="${s}" data-k="${k}" ${extra} value="${v||""}" placeholder="0">`;
+const sign=n=>(n>0?"+":"")+fmt(n);
 
+function tabs(){
+ document.querySelectorAll(".pg").forEach((e,i)=>e.classList.toggle("on",i==S.tab));
+ document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",+b.dataset.tab==S.tab));
+}
 function render(){
  let h=`<thead><tr><th>Name</th><th>Win</th><th>Not Win</th><th>Total</th><th>Win %</th><th>Win Rs.</th><th></th></tr></thead><tbody>`;
  for(const g of ["N","D"]){
@@ -84,17 +112,21 @@ function render(){
  const keys=Object.keys(S.months).sort();
  $("ms").innerHTML=keys.map(k=>`<option value="${k}" ${k==S.sel?"selected":""}>${ml(k)}</option>`).join("");
  const m=S.months[S.sel]||mk();
- const lab={buy:"Buy",win:"Win",free:"Free",rebuy:"Re-Buy"};
- let t=`<thead><tr><th>${S.sel?ml(S.sel):""}</th><th>Count</th><th>Value</th></tr></thead><tbody>`;
- for(const k in lab)t+=`<tr><td>${lab[k]}</td><td>${inp("M",k,m[k])}</td><td id="mv${k}"></td></tr>`;
- t+=`<tr><td>Saving</td><td></td><td>${inp("M","saving",m.saving)}</td></tr></tbody>`;
+ let t=`<thead><tr><th>${S.sel?ml(S.sel):""}</th><th>Count</th><th>Value (Rs.)</th></tr></thead><tbody>
+ <tr><td>Buy</td><td>${inp("M","buy",m.buy)}</td><td id="mvbuy"></td></tr>
+ <tr><td>Win</td><td>${inp("M","win",m.win)}</td><td>${inp("M","winval",m.winval)}</td></tr>
+ <tr><td>Free</td><td>${inp("M","free",m.free)}</td><td id="mvfree"></td></tr>
+ <tr><td>Re-Buy</td><td>${inp("M","rebuy",m.rebuy)}</td><td id="mvrebuy"></td></tr>
+ <tr><td>Saving</td><td></td><td>${inp("M","saving",m.saving)}</td></tr></tbody>`;
  $("t2").innerHTML=t;
+ const vals=[...new Set(S.days.map(e=>e.r))].sort((a,b)=>b-a).slice(0,3);
+ const medal=["🥇","🥈","🥉"];
  const d=[...S.days].sort((a,b)=>b.d.localeCompare(a.d));
- let x=`<thead><tr><th>Date</th><th>Win Rs.</th><th></th></tr></thead><tbody>`;
- d.forEach(e=>{x+=`<tr><td>${e.d}</td><td>${fmt(e.r)}</td><td><button class="x" data-del="${e.id}">✕</button></td></tr>`});
- x+=`</tbody><tfoot><tr><td>All Rs.</td><td id="dtot" class="wn"></td><td></td></tr></tfoot>`;
+ let x=`<thead><tr><th>Date</th><th></th><th>Win Rs.</th><th></th></tr></thead><tbody>`;
+ d.forEach(e=>{const i=vals.indexOf(e.r);x+=`<tr><td>${e.d}</td><td class="md">${i>=0?medal[i]:""}</td><td>${fmt(e.r)}</td><td><button class="x" data-del="${e.id}">✕</button></td></tr>`});
+ x+=`</tbody><tfoot><tr><td>All Rs.</td><td></td><td id="dtot" class="wn"></td><td></td></tr></tfoot>`;
  $("t3").innerHTML=x;
- update();
+ tabs();update();
 }
 function update(){
  let sw=0,sn=0,sr=0;
@@ -104,17 +136,21 @@ function update(){
  $("sw").textContent=sw;$("sn").textContent=sn;$("st").textContent=st;
  $("sp").textContent=st?(sw/st*100).toFixed(1)+"%":"0%";$("sr").textContent=fmt(sr);
  const m=S.months[S.sel]||mk();
- for(const k of ["buy","win","free","rebuy"])$("mv"+k).textContent=fmt(m[k]*P);
+ for(const k of ["buy","free","rebuy"])$("mv"+k).textContent=fmt(m[k]*P);
  const A=mk();
  for(const k in S.months)for(const f in A)A[f]+=S.months[k][f];
  const all=A.buy+A.free+A.rebuy;
- $("t2a").innerHTML=`<thead><tr><th>All</th><th>Count</th><th>Value</th></tr></thead><tbody>
+ $("t2a").innerHTML=`<thead><tr><th>All</th><th>Count</th><th>Value (Rs.)</th></tr></thead><tbody>
  <tr><td>Buy</td><td>${A.buy}</td><td>${fmt(A.buy*P)}</td></tr>
- <tr><td>Win</td><td>${A.win}</td><td>${fmt(A.win*P)}</td></tr>
+ <tr><td>Win</td><td>${A.win}</td><td>${fmt(A.winval)}</td></tr>
  <tr><td>Free</td><td>${A.free}</td><td>${fmt(A.free*P)}</td></tr>
  <tr><td>Re-Buy</td><td>${A.rebuy}</td><td>${fmt(A.rebuy*P)}</td></tr>
- <tr><td>Saving</td><td></td><td>${fmt(A.saving)} /=</td></tr>
+ <tr><td>Saving</td><td></td><td>${fmt(A.saving)}</td></tr>
  <tr class="tot"><td>All</td><td>${all} (${A.buy}+${A.free}+${A.rebuy})</td><td>${fmt(all*P)}</td></tr></tbody>`;
+ const diff=A.winval-A.buy*P;
+ const dv=$("diff");dv.textContent=sign(diff);dv.className="v "+(diff<0?"neg":diff>0?"pos":"");
+ $("dsub").textContent=fmt(A.winval)+" − "+fmt(A.buy*P);
+ $("hn").textContent=sign(diff);
  $("dtot").textContent=fmt(S.days.reduce((s,e)=>s+e.r,0));
 }
 document.addEventListener("input",e=>{
@@ -128,16 +164,18 @@ $("ms").onchange=e=>{S.sel=e.target.value;save();render()};
 $("ma").onclick=()=>{const v=$("mn").value;if(!v)return;if(!S.months[v])S.months[v]=mk();S.sel=v;save();render()};
 $("da").onclick=()=>{const d=$("dd").value,r=num($("dr").value);if(!d||!r)return;
  S.days.push({id:Date.now(),d,r});$("dr").value="";save();render()};
-document.addEventListener("click",e=>{const D=e.target.dataset||{};
+document.addEventListener("click",e=>{const el=e.target.closest("[data-tab],[data-add],[data-rm],[data-del]");if(!el)return;const D=el.dataset;
+ if(D.tab!==undefined){S.tab=+D.tab;save();tabs();window.scrollTo(0,0);return}
  if(D.add){const n=S.items.filter(x=>x.g===D.add).length+1;S.items.push({g:D.add,name:(D.add=="N"?"NLB ":"DLB ")+n,w:0,n:0,r:0});save();render();return}
  if(D.rm!==undefined){const it=S.items[D.rm];if(it&&confirm(it.name+" මකන්නද?")){S.items.splice(+D.rm,1);save();render()}return}
- const id=D.del;
- if(id){S.days=S.days.filter(x=>String(x.id)!==id);save();render()}});
+ if(D.del){S.days=S.days.filter(x=>String(x.id)!==D.del);save();render()}
+});
 const msg=t=>{$("bm").textContent=t};
 $("bk").onclick=()=>{$("bx").value=JSON.stringify(S);$("bx").select();
  try{navigator.clipboard.writeText($("bx").value).then(()=>msg("Copy වුණා. Notes app එකක save කරගන්න."),()=>msg("Text එක select කර copy කරන්න."))}catch(e){msg("Text එක select කර copy කරන්න.")}};
 $("rs").onclick=()=>{try{const d=JSON.parse($("bx").value);if(!d.items||!d.months)throw 0;
- if(confirm("දැනට ඇති දත්ත replace කරන්නද?")){S=d;save();render();msg("Restore වුණා.")}}catch(e){msg("වලංගු backup text එකක් නොවේ.")}};
+ for(const k in d.months){const z=mk();for(const f in z)if(typeof d.months[k][f]!=="number")d.months[k][f]=0}
+ if(confirm("දැනට ඇති දත්ත replace කරන්නද?")){S=d;if(!S.days)S.days=[];if(!S.tab)S.tab=0;save();render();msg("Restore වුණා.")}}catch(e){msg("වලංගු backup text එකක් නොවේ.")}};
 render();
 </script>
 </body>
