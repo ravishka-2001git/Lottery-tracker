@@ -17,6 +17,7 @@ main{max-width:720px;margin:0 auto;padding:12px 12px 96px}
 .hd h1{margin:0;font-size:19px}.hd small{opacity:.85}
 .pill{background:rgba(255,255,255,.2);border-radius:12px;padding:6px 10px;text-align:right;font-size:12px;line-height:1.2}
 .pill b{display:block;font-size:17px}
+.ur{margin-top:8px;display:flex;gap:8px}.ur button{background:rgba(255,255,255,.22);padding:4px 14px;font-size:17px;border-radius:10px}.ur button:disabled{opacity:.35}
 .pg{display:none}.pg.on{display:block}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px;margin-bottom:14px;box-shadow:var(--sh)}
 h2{font-size:16px;margin:0 0 10px}
@@ -46,7 +47,7 @@ nav button.on{color:var(--ac);background:var(--in)}
 </head>
 <body>
 <main>
-<div class="hd"><div><h1>🎟️ Lottery Tracker</h1><small>ටිකට් එකක් Rs. 40</small></div><div class="pill">Win − Buy<b id="hn"></b></div></div>
+<div class="hd"><div><h1>🎟️ Lottery Tracker</h1><small>ටිකට් එකක් Rs. 40</small><div class="ur"><button id="un" aria-label="Undo">↶ Undo</button><button id="re" aria-label="Redo">Redo ↷</button></div></div><div class="pill">Win − Buy<b id="hn"></b></div></div>
 
 <div class="pg" id="p0"><section class="card"><h2>Lottery වර්ග</h2>
 <div class="sc"><table id="t1"></table></div>
@@ -91,6 +92,16 @@ if(!S.days)S.days=[];
 if(!S.tab)S.tab=0;
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 const $=id=>document.getElementById(id);
+const snap=()=>JSON.stringify({items:S.items,months:S.months,days:S.days});
+let undo=[],redo=[],last=snap();
+function updBtns(){$("un").disabled=!undo.length;$("re").disabled=!redo.length}
+function commit(){const c=snap();if(c!==last){undo.push(last);if(undo.length>50)undo.shift();redo=[];last=c}save();updBtns()}
+function apply(x){const d=JSON.parse(x);S.items=d.items;S.months=d.months;S.days=d.days;
+ if(!S.months[S.sel])S.sel=Object.keys(S.months).sort().pop();last=x;save();render()}
+const pct=r=>{const t=r.w+r.n;return t?r.w/t:-1};
+const ord=g=>S.items.map((r,i)=>i).filter(i=>S.items[i].g===g).sort((a,b)=>pct(S.items[b])-pct(S.items[a])||S.items[b].w-S.items[a].w||a-b);
+const sig=()=>ord("N").join(",")+"|"+ord("D").join(",");
+let shown="";
 const ml=k=>MON[+k.slice(5)-1]+" "+k.slice(0,4);
 const inp=(s,k,v,extra="")=>`<input type="number" inputmode="numeric" min="0" data-s="${s}" data-k="${k}" ${extra} value="${v||""}" placeholder="0">`;
 const sign=n=>(n>0?"+":"")+fmt(n);
@@ -103,7 +114,7 @@ function render(){
  let h=`<thead><tr><th>Name</th><th>Win</th><th>Not Win</th><th>Total</th><th>Win %</th><th>Win Rs.</th><th></th></tr></thead><tbody>`;
  for(const g of ["N","D"]){
   h+=`<tr class="grp"><td colspan="7">${g=="N"?"NLB":"DLB"}</td></tr>`;
-  S.items.forEach((r,i)=>{if(r.g!==g)return;
+  ord(g).forEach(i=>{const r=S.items[i];
    h+=`<tr><td><input class="nm" data-s="N" data-i="${i}" value="${r.name.replace(/"/g,"&quot;")}"></td><td>${inp("L","w",r.w,`data-i="${i}"`)}</td><td>${inp("L","n",r.n,`data-i="${i}"`)}</td><td id="lt${i}"></td><td id="lp${i}"></td><td>${inp("L","r",r.r,`data-i="${i}"`)}</td><td><button class="x" data-rm="${i}">✕</button></td></tr>`});
   h+=`<tr><td colspan="7" style="text-align:left"><button data-add="${g}">+ ${g=="N"?"NLB":"DLB"} වර්ගයක් එකතු කරන්න</button></td></tr>`;
  }
@@ -126,7 +137,7 @@ function render(){
  d.forEach(e=>{const i=vals.indexOf(e.r);x+=`<tr><td>${e.d}</td><td class="md">${i>=0?medal[i]:""}</td><td>${fmt(e.r)}</td><td><button class="x" data-del="${e.id}">✕</button></td></tr>`});
  x+=`</tbody><tfoot><tr><td>All Rs.</td><td></td><td id="dtot" class="wn"></td><td></td></tr></tfoot>`;
  $("t3").innerHTML=x;
- tabs();update();
+ shown=sig();tabs();update();updBtns();
 }
 function update(){
  let sw=0,sn=0,sr=0;
@@ -160,22 +171,28 @@ document.addEventListener("input",e=>{
  else if(s=="M")S.months[S.sel][t.dataset.k]=num(t.value);
  save();update();
 });
+document.addEventListener("change",e=>{const t=e.target;if(!t.dataset||!t.dataset.s)return;commit();
+ setTimeout(()=>{if(sig()===shown)return;const a=document.activeElement,d=a&&a.dataset&&a.dataset.s?a.dataset:null;
+  const id=d?[d.s,d.k||"",d.i||""]:null;render();
+  if(id){const el=document.querySelector(`[data-s="${id[0]}"][data-i="${id[2]}"]`+(id[1]?`[data-k="${id[1]}"]`:""));if(el)el.focus()}},0)});
+$("un").onclick=()=>{if(!undo.length)return;redo.push(last);apply(undo.pop())};
+$("re").onclick=()=>{if(!redo.length)return;undo.push(last);apply(redo.pop())};
 $("ms").onchange=e=>{S.sel=e.target.value;save();render()};
-$("ma").onclick=()=>{const v=$("mn").value;if(!v)return;if(!S.months[v])S.months[v]=mk();S.sel=v;save();render()};
+$("ma").onclick=()=>{const v=$("mn").value;if(!v)return;if(!S.months[v])S.months[v]=mk();S.sel=v;commit();render()};
 $("da").onclick=()=>{const d=$("dd").value,r=num($("dr").value);if(!d||!r)return;
- S.days.push({id:Date.now(),d,r});$("dr").value="";save();render()};
+ S.days.push({id:Date.now(),d,r});$("dr").value="";commit();render()};
 document.addEventListener("click",e=>{const el=e.target.closest("[data-tab],[data-add],[data-rm],[data-del]");if(!el)return;const D=el.dataset;
  if(D.tab!==undefined){S.tab=+D.tab;save();tabs();window.scrollTo(0,0);return}
- if(D.add){const n=S.items.filter(x=>x.g===D.add).length+1;S.items.push({g:D.add,name:(D.add=="N"?"NLB ":"DLB ")+n,w:0,n:0,r:0});save();render();return}
- if(D.rm!==undefined){const it=S.items[D.rm];if(it&&confirm(it.name+" මකන්නද?")){S.items.splice(+D.rm,1);save();render()}return}
- if(D.del){S.days=S.days.filter(x=>String(x.id)!==D.del);save();render()}
+ if(D.add){const n=S.items.filter(x=>x.g===D.add).length+1;S.items.push({g:D.add,name:(D.add=="N"?"NLB ":"DLB ")+n,w:0,n:0,r:0});commit();render();return}
+ if(D.rm!==undefined){const it=S.items[D.rm];if(it&&confirm(it.name+" මකන්නද?")){S.items.splice(+D.rm,1);commit();render()}return}
+ if(D.del){S.days=S.days.filter(x=>String(x.id)!==D.del);commit();render()}
 });
 const msg=t=>{$("bm").textContent=t};
 $("bk").onclick=()=>{$("bx").value=JSON.stringify(S);$("bx").select();
  try{navigator.clipboard.writeText($("bx").value).then(()=>msg("Copy වුණා. Notes app එකක save කරගන්න."),()=>msg("Text එක select කර copy කරන්න."))}catch(e){msg("Text එක select කර copy කරන්න.")}};
 $("rs").onclick=()=>{try{const d=JSON.parse($("bx").value);if(!d.items||!d.months)throw 0;
  for(const k in d.months){const z=mk();for(const f in z)if(typeof d.months[k][f]!=="number")d.months[k][f]=0}
- if(confirm("දැනට ඇති දත්ත replace කරන්නද?")){S=d;if(!S.days)S.days=[];if(!S.tab)S.tab=0;save();render();msg("Restore වුණා.")}}catch(e){msg("වලංගු backup text එකක් නොවේ.")}};
+ if(confirm("දැනට ඇති දත්ත replace කරන්නද?")){S=d;if(!S.days)S.days=[];if(!S.tab)S.tab=0;commit();render();msg("Restore වුණා.")}}catch(e){msg("වලංගු backup text එකක් නොවේ.")}};
 render();
 </script>
 </body>
